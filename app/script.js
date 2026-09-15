@@ -1090,8 +1090,9 @@ function fixedPurchaseOrderSegments(records) {
     if (!expiryDate) return; // Missing expiry dates are intentionally unclassified.
     expiryDate.setHours(0, 0, 0, 0);
 
-    if (category === "Finished Goods") {
-      // Finished Goods: Manufacturing_Date -> Expiry_Date.
+    if (category === "Finished Goods" || category === "Raw Materials") {
+      // Both categories: same Expired/Expiry Soon/Healthy formula.
+      // Healthy requires Manufacturing_Date <= zoho.currentdate <= Expiry_Date.
       if (expiryDate < today) {
         batchHealth.expired++;
       } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
@@ -1103,16 +1104,6 @@ function fixedPurchaseOrderSegments(records) {
           manufacturingDate.setHours(0, 0, 0, 0);
           if (manufacturingDate <= today && today <= expiryDate) batchHealth.healthy++;
         }
-      }
-    } else if (category === "Raw Materials") {
-      // Raw Materials: zoho.currentdate -> Expiry_Date. Manufacturing_Date
-      // is never used for this category.
-      if (expiryDate < today) {
-        batchHealth.expired++;
-      } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
-        batchHealth.expirySoon++;
-      } else if (expiryDate > expirySoonCutoff) {
-        batchHealth.healthy++;
       }
     }
   }
