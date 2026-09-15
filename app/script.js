@@ -1120,21 +1120,29 @@ function fixedPurchaseOrderSegments(records) {
       if (!expiryDate) return; // Missing expiry dates are intentionally unclassified.
       expiryDate.setHours(0, 0, 0, 0);
 
-      // Priority (both categories): 1) Expired 2) Expiry Soon 3) Healthy.
-      if (expiryDate < today) {
-        batchHealth.expired++;
-      } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
-        batchHealth.expirySoon++;
+      if (category === "Finished Goods") {
+        // Finished Goods: Manufacturing_Date -> Expiry_Date.
+        if (expiryDate < today) {
+          batchHealth.expired++;
+        } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
+          batchHealth.expirySoon++;
+        } else {
+          // Must have begun manufacturing before it can be healthy.
+          const manufacturingDate = parseZohoDate(batch[BATCH_FIELDS.manufacturingDate]);
+          if (manufacturingDate) {
+            manufacturingDate.setHours(0, 0, 0, 0);
+            if (manufacturingDate <= today && today <= expiryDate) batchHealth.healthy++;
+          }
+        }
       } else if (category === "Raw Materials") {
-        // Raw Materials health ignores Manufacturing_Date entirely; Healthy
-        // requires the expiry to be strictly beyond the 2-day soon window.
-        if (expiryDate > expirySoonCutoff) batchHealth.healthy++;
-      } else {
-        // Finished Goods must have begun manufacturing before they can be healthy.
-        const manufacturingDate = parseZohoDate(batch[BATCH_FIELDS.manufacturingDate]);
-        if (manufacturingDate) {
-          manufacturingDate.setHours(0, 0, 0, 0);
-          if (manufacturingDate <= today && today <= expiryDate) batchHealth.healthy++;
+        // Raw Materials: zoho.currentdate -> Expiry_Date. Manufacturing_Date
+        // is never used for this category.
+        if (expiryDate < today) {
+          batchHealth.expired++;
+        } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
+          batchHealth.expirySoon++;
+        } else if (expiryDate > expirySoonCutoff) {
+          batchHealth.healthy++;
         }
       }
     });
