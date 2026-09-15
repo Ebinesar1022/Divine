@@ -1075,7 +1075,6 @@ function fixedPurchaseOrderSegments(records) {
 
     products.forEach(product => {
       const category = String(displayValue(product[PRODUCT_FIELDS.category]) || "").trim();
-      if (category !== "Finished Goods" && category !== "Raw Materials") return;
 
       const raw = product[PRODUCT_FIELDS.batchDetails];
       const batchRows = Array.isArray(raw) ? raw : (raw ? [raw] : []);
@@ -1084,7 +1083,11 @@ function fixedPurchaseOrderSegments(records) {
       batchRows.forEach(batch => {
         const batchNumber = displayValue(batch[BATCH_FIELDS.number]);
         if (batchNumber === undefined || batchNumber === null || String(batchNumber).trim() === "") return;
+        // Total Batches = every valid Batch_Number in All_Batch_Details,
+        // independent of category — the health buckets below are the only
+        // thing gated to Finished Goods / Raw Materials.
         batchHealth.total++;
+        if (category !== "Finished Goods" && category !== "Raw Materials") return;
 
         const expiryDate = parseZohoDate(batch[BATCH_FIELDS.expiryDate]);
         if (!expiryDate) return; // Missing expiry dates are intentionally unclassified.
