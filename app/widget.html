@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Divine Foods · Production Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Roboto+Slab:wght@700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./Style.css">
+  <script src="https://js.zohostatic.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+</head>
+<body>
+
+  <!-- ===================== PREMIUM MODERN LOADER ===================== -->
+  <div id="loader">
+    <div class="loader-backdrop-glow"></div>
+    <div class="loader-card">
+      <div class="loader-badge">
+        <div class="loader-ring ring-1"></div>
+        <div class="loader-ring ring-2"></div>
+        <div class="loader-ring ring-3"></div>
+        <div class="loader-core">
+          <img class="loader-core-img" src="./divina-logo.png" alt="Divina — Artisan Pizza Bases"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <span class="loader-core-mark" style="display:none">
+            <span class="lcm-word">Divina</span>
+            <span class="lcm-sub">Foods</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="loader-logo">
+        <span class="brand-divine">Divina</span><span class="brand-foods">Foods</span>
+      </div>
+      <div class="loader-subtitle">Manufacturing &amp; Production Intelligence</div>
+
+      <!-- Production process stepper -->
+      <div class="loader-steps">
+        <div class="lstep-track"><div class="lstep-track-fill"></div></div>
+
+        <div class="lstep is-done">
+          <span class="lstep-node">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6"/>
+            </svg>
+          </span>
+          <span class="lstep-label">Raw Material</span>
+        </div>
+
+        <div class="lstep is-done is-working">
+          <span class="lstep-node">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
+            </svg>
+          </span>
+          <span class="lstep-label">Making</span>
+        </div>
+
+    
+
+        <div class="lstep is-done">
+          <span class="lstep-node">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2 2 22l10-3.6L22 22 12 2Z"/>
+              <circle cx="12" cy="9" r="1"/><circle cx="9.5" cy="15" r="1"/><circle cx="14" cy="14.5" r="1"/>
+            </svg>
+          </span>
+          <span class="lstep-label">Finished Good</span>
+        </div>
+
+            <div class="lstep is-done">
+          <span class="lstep-node">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v20"/><path d="m4.5 6 15 12"/><path d="m19.5 6-15 12"/>
+            </svg>
+          </span>
+          <span class="lstep-label">Frozen</span>
+        </div>
+        
+        <div class="lstep is-done">
+          <span class="lstep-node">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m7.5 4.3 9 5.15"/>
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+              <path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>
+            </svg>
+          </span>
+          <span class="lstep-label">Package / Delivery</span>
+        </div>
+      </div>
+
+      <div class="loader-phase">Making Product</div>
+      <div class="loader-phase-sub">Processing and preparing the production…</div>
+
+      <div class="loader-bar-wrap">
+        <div class="loader-bar">
+          <div class="loader-bar-fill"></div>
+          <span class="loader-bar-dot"></span>
+        </div>
+        <span class="loader-bar-pct">0%</span>
+      </div>
+
+      <div class="loader-status-text">
+        <span class="status-pulse-dot"></span>
+        <span>Synchronizing live production records…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MAIN DASHBOARD ===================== -->
+  <div id="dashboard">
+
+    <!-- ===================== TOP NAVIGATION BAR ===================== -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="brand-row">
+          <div class="brand-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <div class="brand-eyebrow-wrap">
+              <span class="brand-eyebrow">Manufacturing Intelligence</span>
+              <span class="live-pill">
+                <span class="live-pulse"></span>
+                <span>Live System</span>
+              </span>
+            </div>
+            <h1>Production Dashboard</h1>
+          </div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="date-pill">
+          <div class="date-pill-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <div class="date-pill-text">
+            <span class="small">Today's Date</span>
+            <span id="currentDate" class="current-date-val">August 28, 2026</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===================== QUICK STATS GRID (8 KPI CARDS) ===================== -->
+    <div class="stats-grid">
+      <!-- 1. Products -->
+      <div class="stat-card tint-amber" title="Total Product Inventory">
+        <div class="stat-icon bg-amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="products">0</div>
+        <div class="stat-label">Products</div>
+        <div class="stat-sub">Total Items</div>
+      </div>
+
+      <!-- 2. Production Target -->
+      <div class="stat-card tint-emerald" title="Total Production Orders">
+        <div class="stat-icon bg-emerald">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="production">0</div>
+        <div class="stat-label">Production Target</div>
+        <div class="stat-sub">Total orders</div>
+      </div>
+
+      <!-- 3. Finished Goods -->
+      <div class="stat-card tint-warm-orange" title="Ready to Ship Finished Goods">
+        <div class="stat-icon bg-warm-orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="finished">0</div>
+        <div class="stat-label">Finished Goods</div>
+        <div class="stat-sub">Ready to ship</div>
+      </div>
+
+      <!-- 4. Raw Materials -->
+      <div class="stat-card tint-teal" title="Raw Materials In Stock">
+        <div class="stat-icon bg-teal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="raw">0</div>
+        <div class="stat-label">Raw Materials</div>
+        <div class="stat-sub">In stock</div>
+      </div>
+
+      <!-- 5. In Progress -->
+      <div class="stat-card tint-mint" title="Active Production Targets">
+        <div class="stat-icon bg-mint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="inprogress">0</div>
+        <div class="stat-label">In Progress</div>
+        <div class="stat-sub">Active targets</div>
+      </div>
+
+      <!-- 6. Confirmed Target -->
+      <div class="stat-card tint-forest" title="Completed Targets">
+        <div class="stat-icon bg-forest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="ctarget">0</div>
+        <div class="stat-label">Confirmed Target</div>
+        <div class="stat-sub">Completed</div>
+      </div>
+
+      <!-- 7. Low Stock -->
+      <div class="stat-card tint-coral" title="Needs Attention">
+        <div class="stat-icon bg-coral">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="lowstock">0</div>
+        <div class="stat-label">Low Stock</div>
+        <div class="stat-sub">Needs attention</div>
+      </div>
+
+      <!-- 8. Pending POs -->
+      <div class="stat-card tint-indigo" title="Purchase Orders">
+        <div class="stat-icon bg-indigo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="pendingpo">0</div>
+        <div class="stat-label">Pending POs</div>
+        <div class="stat-sub">Purchase orders</div>
+      </div>
+    </div>
+
+    <!-- ===================== PRODUCTION TARGETS + STATUS ===================== -->
+    <div class="main-grid">
+      <!-- Bar Chart Panel -->
+      <div class="pcp-panel panel">
+        <div class="pcp-head">
+          <div class="head-title-wrap">
+            <div class="head-icon-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <div>
+              <h3>Production Targets</h3>
+              <p class="pcp-sub">Order count by current year &amp; month</p>
+            </div>
+          </div>
+          <div class="pcp-pills" id="productionTargetPills">
+            <span class="pcp-pill active" data-period="year">Year</span>
+            <span class="pcp-pill" data-period="month">Month</span>
+          </div>
+        </div>
+
+        <div class="pcp-stat-row">
+          <span class="pcp-stat-value" id="pcpStatTotal">0</span>
+          <span class="pcp-stat-label">Total Production Target</span>
+        </div>
+
+        <div class="pcp-canvas-wrap" id="pcpCanvasWrap">
+          <svg id="pcpChart" class="pcp-svg" viewBox="0 0 640 260" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="pcp-tooltip" id="pcpTooltip"></div>
+        </div>
+      </div>
+
+      <!-- Donut Panel -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="head-title-wrap">
+            <div class="head-icon-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 2a10 10 0 0 1 10 10"/>
+              </svg>
+            </div>
+            <div>
+              <h3>Production Order Status</h3>
+              <p class="pcp-sub">Real-time status breakdown</p>
+            </div>
+          </div>
+          <span class="panel-badge">Live</span>
+        </div>
+        <div class="pcp-donut-wrap">
+          <div class="pcp-donut-box" style="width:200px;height:200px;">
+            <svg id="statusDonutSvg" viewBox="0 0 200 200" width="200" height="200"></svg>
+            <div class="pcp-donut-center">
+              <span class="pcp-donut-total" id="totalpt">0</span>
+              <span class="pcp-donut-total-label">Total Orders</span>
+            </div>
+          </div>
+          <div class="pcp-legend" id="statusLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== TABLES ===================== -->
+    <div class="tables-grid">
+      <!-- Production Target Table -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="head-title-wrap">
+            <div class="head-icon-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <div>
+              <h3>Production Target</h3>
+              <p class="pcp-sub">Upcoming production schedule</p>
+            </div>
+          </div>
+          <button type="button" class="chip" id="ptViewAllBtn">View all ▾</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-rank">#</th>
+                <th>Product</th>
+                <th class="col-date">Production date</th>
+                <th class="col-num">Target Quantity</th>
+                <th class="col-status">Status</th>
+              </tr>
+            </thead>
+            <tbody id="ptbody">
+              <tr><td class="rank">1</td><td class="name-cell"><span class="prod-icon">🥫</span><span class="prod-name-text">Poori</span></td><td>Jul 31</td><td class="amount">100 units</td><td><span class="status-pill">planned</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Top Production Products Table -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="head-title-wrap">
+            <div class="head-icon-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </div>
+            <div>
+              <h3>Top Production Products</h3>
+              <p class="pcp-sub">Most frequently produced items</p>
+            </div>
+          </div>
+          <button type="button" class="chip" id="tpViewAllBtn">View all ▾</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-rank">#</th>
+                <th>Product name</th>
+                <th class="col-num">Times produced</th>
+              </tr>
+            </thead>
+            <tbody id="topProductsBody">
+              <tr><td class="rank">1</td><td class="name-cell"><span class="prod-icon">🥫</span><span class="prod-name-text">Poori</span></td><td class="amount">11</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== STOCK STATUS / PRODUCT MIX / PRODUCTS LIST ===================== -->
+    <div class="pcp-grid-row row">
+      <!-- Stock Status -->
+      <div class="pcp-panel">
+        <div class="pcp-head">
+          <div>
+            <h3>Stock Status</h3>
+            <p class="pcp-sub">Products by reorder health</p>
+          </div>
+          <span class="pcp-badge pcp-badge-danger" id="stockBadge">0 low stock</span>
+        </div>
+        <div class="pcp-donut-wrap">
+          <div class="pcp-donut-box">
+            <svg id="stockDonutSvg" viewBox="0 0 180 180" width="180" height="180"></svg>
+            <div class="pcp-donut-center">
+              <span class="pcp-donut-total" id="stockDonutTotal">0</span>
+              <span class="pcp-donut-total-label">Products</span>
+            </div>
+          </div>
+          <div class="pcp-legend" id="stockLegend"></div>
+        </div>
+      </div>
+
+      <!-- Product Mix -->
+      <div class="pcp-panel">
+        <div class="pcp-head">
+          <div>
+            <h3>Product Mix</h3>
+            <p class="pcp-sub">Raw materials vs finished goods</p>
+          </div>
+          <span class="pcp-badge pcp-badge-neutral" id="catBadge">0 products tracked</span>
+        </div>
+        <div class="pcp-donut-wrap">
+          <div class="pcp-donut-box">
+            <svg id="catDonutSvg" viewBox="0 0 180 180" width="180" height="180"></svg>
+            <div class="pcp-donut-center">
+              <span class="pcp-donut-total" id="catDonutTotal">0</span>
+              <span class="pcp-donut-total-label">Products</span>
+            </div>
+          </div>
+          <div class="pcp-legend" id="catLegend"></div>
+        </div>
+      </div>
+
+      <!-- Products List -->
+      <div class="pcp-panel products-panel">
+        <div class="pcp-head">
+          <div>
+            <h3>Products</h3>
+            <p class="pcp-sub">Full inventory catalog</p>
+          </div>
+          <span class="pcp-badge pcp-badge-neutral" id="productsCountBadge">0 items</span>
+        </div>
+
+        <div class="product-filters" id="productFilters">
+          <span class="pcp-pill active" data-filter="all">All</span>
+          <span class="pcp-pill" data-filter="low">Low stock</span>
+          <span class="pcp-pill" data-filter="Raw Materials">Raw</span>
+          <span class="pcp-pill" data-filter="Finished Goods">Finished</span>
+        </div>
+
+        <div class="product-list" id="productList"></div>
+      </div>
+    </div>
+
+    <!-- ===================== BATCH HEALTH CARDS ===================== -->
+    <div class="batch-section">
+      <div class="section-header-row">
+        <div class="head-title-wrap">
+          <div class="head-icon-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+          </div>
+          <div>
+            <h2>Batch &amp; Quality Health</h2>
+            <p class="section-sub">Real-time batch shelf life &amp; expiration telemetry</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="batch-grid">
+
+         <div class="batch-card batch-emeral">
+          <div class="batch-body">
+            <span class="batch-value" id="batchOverall">0</span>
+            <span class="batch-label">Total Batches</span>
+            <span class="batch-sub">Total batches</span>
+          </div>
+          <div class="batch-progress">
+            <div class="batch-progress-bar emerald" style="width:85%"></div>
+          </div>
+        </div>
+
+
+        <div class="batch-card batch-emerald">
+          <div class="batch-body">
+            <span class="batch-value" id="batchHealthy">0</span>
+            <span class="batch-label">Healthy Batches</span>
+            <span class="batch-sub">Good standing batches</span>
+          </div>
+          <div class="batch-progress">
+            <div class="batch-progress-bar emerald" style="width:85%"></div>
+          </div>
+        </div>
+
+        <div class="batch-card batch-amber">
+          <div class="batch-body">
+            <span class="batch-value" id="batchExpirySoon">0</span>
+            <span class="batch-label">Expiry Soon</span>
+            <span class="batch-sub">Batches nearing expiry</span>
+          </div>
+          <div class="batch-progress">
+            <div class="batch-progress-bar amber" style="width:45%"></div>
+          </div>
+        </div>
+
+        <div class="batch-card batch-coral">
+          <div class="batch-body">
+            <span class="batch-value" id="batchExpired">0</span>
+            <span class="batch-label">Expired</span>
+            <span class="batch-sub">Batches expired</span>
+          </div>
+          <div class="batch-progress">
+            <div class="batch-progress-bar coral" style="width:15%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== PO STATUS + WAREHOUSE DISTRIBUTION ===================== -->
+    <div class="health-grid-row">
+      <!-- PO Status Donut -->
+      <div class="panel po-panel">
+        <div class="panel-head">
+          <div class="head-title-wrap">
+            <div class="head-icon-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 8"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+            </div>
+            <div>
+              <h3>Purchase Order Status</h3>
+              <p class="pcp-sub">Inbound supply fulfillment</p>
+            </div>
+          </div>
+          <span class="panel-badge">PO</span>
+        </div>
+        <div class="pcp-donut-wrap">
+          <div class="pcp-donut-box" style="width:190px;height:190px;">
+            <svg id="poDonutSvg" viewBox="0 0 190 190" width="190" height="190"></svg>
+            <div class="pcp-donut-center">
+              <div class="po-donut-center-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 8"/>
+                  <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+                </svg>
+              </div>
+              <span class="pcp-donut-total" id="poDonutTotal">0</span>
+              <span class="pcp-donut-total-label">Total POs</span>
+            </div>
+          </div>
+          <div class="po-chip-legend" id="poLegend"></div>
+        </div>
+      </div>
+
+      <!-- Stock Distribution Line Chart -->
+      <div class="pcp-panel">
+        <div class="pcp-head">
+          <div class="head-title-wrap">
+            <div class="head-icon-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+              </svg>
+            </div>
+            <div>
+              <h3>Stock Distribution (Warehouse)</h3>
+              <p class="pcp-sub">Product quantity allocation by warehouse facility</p>
+            </div>
+          </div>
+        </div>
+        <div class="line-chart-wrap" id="whChartWrap">
+          <svg id="whChart" class="line-chart-svg" viewBox="0 0 640 240" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="pcp-tooltip" id="whChartTooltip"></div>
+        </div>
+        <div class="line-chart-legend" id="whChartLegend"></div>
+      </div>
+    </div>
+
+    <!-- ===================== WAREHOUSE STOCK TABLE ===================== -->
+    <div class="panel warehouse-panel">
+      <div class="panel-head">
+        <div class="head-title-wrap">
+          <div class="head-icon-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Warehouse Stock</h3>
+            <p class="pcp-sub" id="whTableSub">Main Warehouse stock levels</p>
+          </div>
+        </div>
+        <div class="wh-tabs" id="whTabs">
+          <span class="pcp-pill active" data-warehouse="main">Main Warehouse</span>
+          <span class="pcp-pill" data-warehouse="production">Production Warehouse</span>
+          <span class="pcp-pill" data-warehouse="scrap">Scrap Warehouse</span>
+        </div>
+        <button type="button" class="chip" id="whViewAllBtn">View all ▾</button>
+      </div>
+      <div class="wh-table-scroll">
+        <table>
+          <thead id="whTableHead"></thead>
+          <tbody id="whTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===================== PRODUCTION OUTPUT ===================== -->
+    <div class="pcp-panel prod-chart-panel">
+      <div class="pcp-head">
+        <div class="head-title-wrap">
+          <div class="head-icon-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Production Output</h3>
+            <p class="pcp-sub">Total manufactured units over time</p>
+          </div>
+        </div>
+        <div class="output-period-control">
+          <button type="button" class="output-period-btn" data-period="date">Date</button>
+          <button type="button" class="output-period-btn" data-period="month">Month</button>
+          <button type="button" class="output-period-btn active" data-period="year">Year</button>
+          <input id="prodOutputDate" class="output-period-field" type="date" aria-label="Production output date" hidden>
+          <input id="prodOutputMonth" class="output-period-field" type="month" aria-label="Production output month" hidden>
+          <select id="prodOutputYear" class="output-period-field" aria-label="Production output year"></select>
+        </div>
+      </div>
+      <div class="pcp-stat-row">
+        <span class="pcp-stat-value" id="prodMonthStatTotal">0</span>
+        <span class="pcp-stat-label">Total quantity produced</span>
+      </div>
+      <div class="pcp-canvas-wrap" id="prodMonthCanvasWrap">
+        <svg id="prodMonthChart" class="pcp-svg" viewBox="0 0 900 340" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="pcp-tooltip" id="prodMonthTooltip"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===================== SHARED "VIEW ALL" MODAL ===================== -->
+  <div class="app-modal-overlay" id="appModalOverlay">
+    <div class="app-modal">
+      <div class="app-modal-head">
+        <h3 id="appModalTitle">All records</h3>
+        <button type="button" class="app-modal-close" id="appModalClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="app-modal-body" id="appModalBody"></div>
+    </div>
+  </div>
+
+  <script src="./script.js"></script>
+
+</body>
+</html>
