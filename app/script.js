@@ -1118,13 +1118,11 @@ function fixedPurchaseOrderSegments(records) {
     const resolvedViaKey = new Set();
 
     batches.forEach(batch => {
-      // Total Batches is every valid batch row returned by All_Batch_Details.
       const batchNumber = displayValue(batch[BATCH_FIELDS.number]);
       if (batchNumber === undefined || batchNumber === null || String(batchNumber).trim() === "") return;
-      batchHealth.total++;
 
-      // Health categories require Product_Master so Finished Goods and Raw
-      // Materials can use their different date rules.
+      // Total Batches only counts rows associated with a relevant (Finished
+      // Goods / Raw Materials) Product_Master record.
       const { product, key } = resolveProduct(batch);
       if (!product) {
         rowsMissingProductLookup++;
@@ -1133,24 +1131,27 @@ function fixedPurchaseOrderSegments(records) {
       resolvedViaKey.add(key);
       const category = String(displayValue(product.category) || "").trim();
       if (category !== "Finished Goods" && category !== "Raw Materials") return;
+      batchHealth.total++;
+
       const expiryDate = parseZohoDate(batch[BATCH_FIELDS.expiryDate]);
       if (!expiryDate) return; // Missing expiry dates are intentionally unclassified.
       expiryDate.setHours(0, 0, 0, 0);
 
-      // Priority makes the classifications mutually exclusive for each row.
+      // Priority (both categories): 1) Expired 2) Expiry Soon 3) Healthy.
       if (expiryDate < today) {
         batchHealth.expired++;
       } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
         batchHealth.expirySoon++;
       } else if (category === "Raw Materials") {
-        // Raw-material health deliberately ignores Manufacturing_Date.
-        batchHealth.healthy++;
+        // Raw Materials health ignores Manufacturing_Date entirely; Healthy
+        // requires the expiry to be strictly beyond the 2-day soon window.
+        if (expiryDate > expirySoonCutoff) batchHealth.healthy++;
       } else {
-        // Finished goods must have begun manufacturing before they can be healthy.
+        // Finished Goods must have begun manufacturing before they can be healthy.
         const manufacturingDate = parseZohoDate(batch[BATCH_FIELDS.manufacturingDate]);
         if (manufacturingDate) {
           manufacturingDate.setHours(0, 0, 0, 0);
-          if (manufacturingDate <= today) batchHealth.healthy++;
+          if (manufacturingDate <= today && today <= expiryDate) batchHealth.healthy++;
         }
       }
     });
