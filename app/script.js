@@ -1,3 +1,5 @@
+console.info("%cDIVINE SCRIPT BUILD MARKER: 2026-09-15-v7", "background:#111;color:#0f0;font-weight:bold;padding:4px");
+
 ///////////////////////////////// loader animation ////////////////////////////////
 (function () {
   document.addEventListener('DOMContentLoaded', function () {
