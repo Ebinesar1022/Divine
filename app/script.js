@@ -1050,11 +1050,15 @@ function fixedPurchaseOrderSegments(records) {
 })();
 
 ////////////////////////// batch health cards — live batch/report data //////////////////////////
-// Batches are read from All_Batch_Details and joined to their product via
-// BATCH_FIELDS.productLookup ("Product_Master"), now that that field has
-// been added to All_Batch_Details' report configuration in Zoho Creator —
-// the Data API only ever returns fields actually configured on a report, so
-// the join couldn't resolve anything before that field was added.
+// Primary path: batches from All_Batch_Details joined to Product_Master via
+// BATCH_FIELDS.productLookup. If that join resolves nothing at all — even
+// after Product_Master was added to the report's field configuration in
+// Zoho Creator — that points to a known Zoho Creator limitation where a
+// bidirectional relation field doesn't come back through bulk getRecords()
+// regardless of report config. The fallback below re-fetches each relevant
+// product's own record by ID instead: that call returns the full record
+// detail, including its embedded Batch_Details subform, the same data the
+// record's detail-view popup already shows.
 (async function initBatchHealth() {
   const batchHealth = { total: 0, healthy: 0, expirySoon: 0, expired: 0 };
 
@@ -1064,6 +1068,53 @@ function fixedPurchaseOrderSegments(records) {
     if (Array.isArray(value)) return value.length ? lookupId(value[0]) : null;
     if (value && typeof value === "object") return value.ID || value.id || null;
     return value;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const expirySoonCutoff = new Date(today);
+  expirySoonCutoff.setDate(expirySoonCutoff.getDate() + 2);
+
+  // Classifies one Batch_Details row into batchHealth given its product's
+  // category. Shared by the primary join path and the getRecordById
+  // fallback so the two can never compute different results for the same row.
+  function classifyBatch(batch, category) {
+    const batchNumber = displayValue(batch[BATCH_FIELDS.number]);
+    if (batchNumber === undefined || batchNumber === null || String(batchNumber).trim() === "") return;
+    // Total Batches = every valid Batch_Number, independent of category —
+    // the health buckets below are the only thing gated to Finished
+    // Goods / Raw Materials.
+    batchHealth.total++;
+
+    const expiryDate = parseZohoDate(batch[BATCH_FIELDS.expiryDate]);
+    if (!expiryDate) return; // Missing expiry dates are intentionally unclassified.
+    expiryDate.setHours(0, 0, 0, 0);
+
+    if (category === "Finished Goods") {
+      // Finished Goods: Manufacturing_Date -> Expiry_Date.
+      if (expiryDate < today) {
+        batchHealth.expired++;
+      } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
+        batchHealth.expirySoon++;
+      } else {
+        // Must have begun manufacturing before it can be healthy.
+        const manufacturingDate = parseZohoDate(batch[BATCH_FIELDS.manufacturingDate]);
+        if (manufacturingDate) {
+          manufacturingDate.setHours(0, 0, 0, 0);
+          if (manufacturingDate <= today && today <= expiryDate) batchHealth.healthy++;
+        }
+      }
+    } else if (category === "Raw Materials") {
+      // Raw Materials: zoho.currentdate -> Expiry_Date. Manufacturing_Date
+      // is never used for this category.
+      if (expiryDate < today) {
+        batchHealth.expired++;
+      } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
+        batchHealth.expirySoon++;
+      } else if (expiryDate > expirySoonCutoff) {
+        batchHealth.healthy++;
+      }
+    }
   }
 
   try {
@@ -1093,69 +1144,63 @@ function fixedPurchaseOrderSegments(records) {
       return name ? (productByName.get(name) || null) : null;
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const expirySoonCutoff = new Date(today);
-    expirySoonCutoff.setDate(expirySoonCutoff.getDate() + 2);
     let rowsMissingProductLookup = 0;
+    let validBatchCount = 0;
 
     batches.forEach(batch => {
       const batchNumber = displayValue(batch[BATCH_FIELDS.number]);
       if (batchNumber === undefined || batchNumber === null || String(batchNumber).trim() === "") return;
-
-      // Total Batches = every valid Batch_Number in All_Batch_Details,
-      // independent of category — the health buckets below are the only
-      // thing gated to Finished Goods / Raw Materials.
-      batchHealth.total++;
+      validBatchCount++;
 
       const product = resolveProduct(batch);
       if (!product) {
         rowsMissingProductLookup++;
         return;
       }
-      const category = String(displayValue(product.category) || "").trim();
-      if (category !== "Finished Goods" && category !== "Raw Materials") return;
-
-      const expiryDate = parseZohoDate(batch[BATCH_FIELDS.expiryDate]);
-      if (!expiryDate) return; // Missing expiry dates are intentionally unclassified.
-      expiryDate.setHours(0, 0, 0, 0);
-
-      if (category === "Finished Goods") {
-        // Finished Goods: Manufacturing_Date -> Expiry_Date.
-        if (expiryDate < today) {
-          batchHealth.expired++;
-        } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
-          batchHealth.expirySoon++;
-        } else {
-          // Must have begun manufacturing before it can be healthy.
-          const manufacturingDate = parseZohoDate(batch[BATCH_FIELDS.manufacturingDate]);
-          if (manufacturingDate) {
-            manufacturingDate.setHours(0, 0, 0, 0);
-            if (manufacturingDate <= today && today <= expiryDate) batchHealth.healthy++;
-          }
-        }
-      } else if (category === "Raw Materials") {
-        // Raw Materials: zoho.currentdate -> Expiry_Date. Manufacturing_Date
-        // is never used for this category.
-        if (expiryDate < today) {
-          batchHealth.expired++;
-        } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
-          batchHealth.expirySoon++;
-        } else if (expiryDate > expirySoonCutoff) {
-          batchHealth.healthy++;
-        }
-      }
+      classifyBatch(batch, String(displayValue(product.category) || "").trim());
     });
+
+    // Fallback: the join above resolved nothing at all. Re-fetch each
+    // relevant product's own record by ID, which returns its Batch_Details
+    // subform directly regardless of the report-level field limitation.
+    const joinFailed = validBatchCount > 0 && rowsMissingProductLookup === validBatchCount;
+    const canFetchById = typeof ZOHO !== 'undefined' && ZOHO.CREATOR && ZOHO.CREATOR.API
+      && typeof ZOHO.CREATOR.API.getRecordById === 'function';
+
+    if (joinFailed && canFetchById) {
+      batchHealth.total = 0; batchHealth.healthy = 0; batchHealth.expirySoon = 0; batchHealth.expired = 0;
+      const products = await getProductMaster();
+      for (const product of products) {
+        const category = String(displayValue(product[PRODUCT_FIELDS.category]) || "").trim();
+        if (category !== "Finished Goods" && category !== "Raw Materials") continue;
+        try {
+          const res = await ZOHO.CREATOR.API.getRecordById({
+            app_name: ZOHO_APP, report_name: REPORTS.products, id: product[PRODUCT_FIELDS.id], field_config: "all"
+          });
+          const record = (res && (res.data || res.record)) || res;
+          const rows = record ? record[PRODUCT_FIELDS.batchDetails] : null;
+          const batchRows = Array.isArray(rows) ? rows : (rows ? [rows] : []);
+          batchRows.forEach(batch => classifyBatch(batch, category));
+        } catch (error) {
+          console.error(`Error fetching Product_Master record ${product[PRODUCT_FIELDS.id]} by ID:`, error);
+        }
+        await __delay(150); // throttle — avoid 429 Too Many Requests across ~N sequential calls
+      }
+    }
 
     // Kept in the browser console only, so an unavailable/unshared field is
     // immediately distinguishable from a genuine zero-batch result. If
-    // rowsMissingProductLookup is still close to batchRows, Product_Master
-    // isn't actually coming back on All_Batch_Details rows yet — re-check the
-    // report's field configuration/publish state in Zoho Creator, not this code.
+    // rowsMissingProductLookup is still close to batchRows AND
+    // usedGetRecordByIdFallback is false, ZOHO.CREATOR.API.getRecordById
+    // isn't available in this widget SDK version — that method name/shape
+    // needs to be re-checked against Zoho's current widget JS API docs.
     console.info("Batch Health loaded", {
       batchRows: batches.length,
       productRows: productById.size,
       rowsMissingProductLookup,
+      joinFailed,
+      canFetchById,
+      usedGetRecordByIdFallback: joinFailed && canFetchById,
       sampleBatchKeys: batches.length ? Object.keys(batches[0]) : [],
       batchHealth
     });
