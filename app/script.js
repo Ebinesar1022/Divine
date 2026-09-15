@@ -1050,125 +1050,88 @@ function fixedPurchaseOrderSegments(records) {
 })();
 
 ////////////////////////// batch health cards — live batch/report data //////////////////////////
+// All_Batch_Details (the flat report) only returns the fields configured as
+// that report's own columns (Batch_Number/Manufacturing_Date/Expiry_Date/
+// stock fields/ID) — its Product_Master lookup is never included in the API
+// response, so a batch row fetched from that report can never be joined back
+// to a product. Product_Master already embeds its own batches (the
+// Batch_Details grid/subform field on the Product_Master form, bidirectional
+// with Batch_Details.Product_Master), and Product_Master_Report is fetched
+// with field_config=all elsewhere in this file — same pattern already relied
+// on for Consumption_Entry.Finished_Good above — so batches are read from
+// there instead. Each batch then already carries its parent's category, with
+// no lookup/matching step needed at all.
 (async function initBatchHealth() {
   const batchHealth = { total: 0, healthy: 0, expirySoon: 0, expired: 0 };
 
-  // Creator lookup values may be returned as a lookup object or as a
-  // one-item lookup array, depending on the report configuration.
-  function lookupId(value) {
-    if (Array.isArray(value)) return value.length ? lookupId(value[0]) : null;
-    if (value && typeof value === "object") return value.ID || value.id || null;
-    return value;
-  }
-
-  // Fields on an All_Batch_Details row that are never the Product_Master
-  // relation — used to keep the fallback scan below from matching metadata.
-  const NON_LOOKUP_BATCH_KEYS = new Set([
-    BATCH_FIELDS.number, BATCH_FIELDS.manufacturingDate, BATCH_FIELDS.expiryDate,
-    "ID", "Added_User", "Added_Time", "Modified_By", "Modified_Time"
-  ]);
-
   try {
-    const [batches, productById] = await Promise.all([
-      fetchReportCached(REPORTS.batches),
-      getProductById()
-    ]);
-    // Some Creator report layouts expose the lookup's display value but an ID
-    // belonging to the report row rather than Product_Master.ID. Build a
-    // display-name index from the already-cached Product Master records as a
-    // safe relationship fallback; no additional report call is needed.
-    const productByName = new Map();
-    productById.forEach(product => {
-      const name = String(product.name || "").trim();
-      if (name && !productByName.has(name)) productByName.set(name, product);
-      const productCode = String(product.productId || "").trim();
-      if (productCode && !productByName.has(productCode)) productByName.set(productCode, product);
-    });
-
-    // Resolves the Product_Master relation for a Batch_Details row. Tries the
-    // configured field key first; if the live report doesn't actually expose
-    // the relation under that exact key (e.g. Creator silently renamed the
-    // field's link name), falls back to scanning the row's own fields for
-    // whichever one actually identifies a known Product_Master record. This
-    // never invents a match — it only succeeds against a real product.
-    function resolveProduct(batch) {
-      const direct = batch[BATCH_FIELDS.productLookup];
-      const fromDirect = matchProduct(direct);
-      if (fromDirect) return { product: fromDirect, key: BATCH_FIELDS.productLookup };
-      for (const key of Object.keys(batch)) {
-        if (NON_LOOKUP_BATCH_KEYS.has(key) || key === BATCH_FIELDS.productLookup) continue;
-        const match = matchProduct(batch[key]);
-        if (match) return { product: match, key };
-      }
-      return { product: null, key: null };
-    }
-    function matchProduct(value) {
-      if (value === undefined || value === null || value === "") return null;
-      const id = lookupId(value);
-      if (id !== undefined && id !== null && productById.has(String(id))) return productById.get(String(id));
-      const name = String(displayValue(value) || "").trim();
-      return name ? (productByName.get(name) || null) : null;
-    }
-
+    const products = await getProductMaster();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const expirySoonCutoff = new Date(today);
     expirySoonCutoff.setDate(expirySoonCutoff.getDate() + 2);
-    let rowsMissingProductLookup = 0;
-    const resolvedViaKey = new Set();
 
-    batches.forEach(batch => {
-      const batchNumber = displayValue(batch[BATCH_FIELDS.number]);
-      if (batchNumber === undefined || batchNumber === null || String(batchNumber).trim() === "") return;
+    let productsWithBatches = 0;
 
-      // Total Batches only counts rows associated with a relevant (Finished
-      // Goods / Raw Materials) Product_Master record.
-      const { product, key } = resolveProduct(batch);
-      if (!product) {
-        rowsMissingProductLookup++;
-        return;
-      }
-      resolvedViaKey.add(key);
-      const category = String(displayValue(product.category) || "").trim();
+    products.forEach(product => {
+      const category = String(displayValue(product[PRODUCT_FIELDS.category]) || "").trim();
       if (category !== "Finished Goods" && category !== "Raw Materials") return;
-      batchHealth.total++;
 
-      const expiryDate = parseZohoDate(batch[BATCH_FIELDS.expiryDate]);
-      if (!expiryDate) return; // Missing expiry dates are intentionally unclassified.
-      expiryDate.setHours(0, 0, 0, 0);
+      const raw = product[PRODUCT_FIELDS.batchDetails];
+      const batchRows = Array.isArray(raw) ? raw : (raw ? [raw] : []);
+      if (batchRows.length) productsWithBatches++;
 
-      // Priority (both categories): 1) Expired 2) Expiry Soon 3) Healthy.
-      if (expiryDate < today) {
-        batchHealth.expired++;
-      } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
-        batchHealth.expirySoon++;
-      } else if (category === "Raw Materials") {
-        // Raw Materials health ignores Manufacturing_Date entirely; Healthy
-        // requires the expiry to be strictly beyond the 2-day soon window.
-        if (expiryDate > expirySoonCutoff) batchHealth.healthy++;
-      } else {
-        // Finished Goods must have begun manufacturing before they can be healthy.
-        const manufacturingDate = parseZohoDate(batch[BATCH_FIELDS.manufacturingDate]);
-        if (manufacturingDate) {
-          manufacturingDate.setHours(0, 0, 0, 0);
-          if (manufacturingDate <= today && today <= expiryDate) batchHealth.healthy++;
+      batchRows.forEach(batch => {
+        const batchNumber = displayValue(batch[BATCH_FIELDS.number]);
+        if (batchNumber === undefined || batchNumber === null || String(batchNumber).trim() === "") return;
+        batchHealth.total++;
+
+        const expiryDate = parseZohoDate(batch[BATCH_FIELDS.expiryDate]);
+        if (!expiryDate) return; // Missing expiry dates are intentionally unclassified.
+        expiryDate.setHours(0, 0, 0, 0);
+
+        // Priority (both categories): 1) Expired 2) Expiry Soon 3) Healthy.
+        if (expiryDate < today) {
+          batchHealth.expired++;
+        } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
+          batchHealth.expirySoon++;
+        } else if (category === "Raw Materials") {
+          // Raw Materials health ignores Manufacturing_Date entirely; Healthy
+          // requires the expiry to be strictly beyond the 2-day soon window.
+          if (expiryDate > expirySoonCutoff) batchHealth.healthy++;
+        } else {
+          // Finished Goods must have begun manufacturing before they can be healthy.
+          const manufacturingDate = parseZohoDate(batch[BATCH_FIELDS.manufacturingDate]);
+          if (manufacturingDate) {
+            manufacturingDate.setHours(0, 0, 0, 0);
+            if (manufacturingDate <= today && today <= expiryDate) batchHealth.healthy++;
+          }
         }
-      }
+      });
     });
-    // Kept in the browser console only, so an unavailable/unshared report is
-    // immediately distinguishable from a genuine zero-batch result. If
-    // resolvedViaKey ever shows a key other than BATCH_FIELDS.productLookup,
-    // that's the report's real Product_Master link name — update the config.
+
+    // Kept in the browser console only, so an empty result is immediately
+    // distinguishable from an unshared report or an empty Batch_Details
+    // subform. If sampleBatchKeys is empty, Batch_Details isn't coming back
+    // as embedded subform rows on Product_Master_Report — re-check the field
+    // name/report sharing in Zoho Creator, not this code.
     console.info("Batch Health loaded", {
-      batchRows: batches.length,
-      productRows: productById.size,
-      resolvedViaKey: Array.from(resolvedViaKey),
-      rowsMissingProductLookup,
-      sampleBatchKeys: batches.length ? Object.keys(batches[0]) : [],
+      productRows: products.length,
+      productsWithBatches,
+      sampleProductKeys: products.length ? Object.keys(products[0]) : [],
+      sampleBatchKeys: (() => {
+        const withBatches = products.find(p => {
+          const rows = p[PRODUCT_FIELDS.batchDetails];
+          return Array.isArray(rows) ? rows.length : !!rows;
+        });
+        if (!withBatches) return [];
+        const rows = withBatches[PRODUCT_FIELDS.batchDetails];
+        return Object.keys((Array.isArray(rows) ? rows[0] : rows) || {});
+      })(),
       batchHealth
     });
   } catch (error) {
-    console.error("Error fetching All_Batch_Details:", error);
+    console.error("Error fetching Product_Master_Report batch data:", error);
   }
 
   setText('batchOverall', batchHealth.total);
