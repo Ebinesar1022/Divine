@@ -1062,7 +1062,16 @@ function fixedPurchaseOrderSegments(records) {
 // detail, including its embedded Batch_Details subform, the same data the
 // record's detail-view popup already shows.
 (async function initBatchHealth() {
-  const batchHealth = { total: 0, healthy: 0, expirySoon: 0, expired: 0 };
+  // Total Batches is a flat count of All_Batch_Details — independent of
+  // product resolution. Healthy/Expiry Soon/Expired are each computed
+  // separately per category and only ever combined by addition at the end;
+  // no state here is ever calculated "directly from only one category".
+  const counts = {
+    finishedGoodsHealthy: 0, rawMaterialsHealthy: 0,
+    finishedGoodsExpirySoon: 0, rawMaterialsExpirySoon: 0,
+    finishedGoodsExpired: 0, rawMaterialsExpired: 0
+  };
+  let totalBatches = 0;
 
   // Creator lookup values may be returned as a lookup object or as a
   // one-item lookup array, depending on the report configuration.
@@ -1074,38 +1083,61 @@ function fixedPurchaseOrderSegments(records) {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const expirySoonCutoff = new Date(today);
-  expirySoonCutoff.setDate(expirySoonCutoff.getDate() + 2);
 
-  // Classifies one Batch_Details row into batchHealth given its product's
-  // category. Shared by the primary join path and the getRecordById
-  // fallback so the two can never compute different results for the same row.
-  function classifyBatch(batch, category) {
+  function isValidBatchNumber(batch) {
     const batchNumber = displayValue(batch[BATCH_FIELDS.number]);
-    if (batchNumber === undefined || batchNumber === null || String(batchNumber).trim() === "") return;
-    // Total Batches = every valid Batch_Number, independent of category —
-    // the health buckets below are the only thing gated to Finished
-    // Goods / Raw Materials.
-    batchHealth.total++;
+    return !(batchNumber === undefined || batchNumber === null || String(batchNumber).trim() === "");
+  }
+
+  // Classifies one Batch_Details row into the counts above given its
+  // product's category. Shared by the primary join path and the
+  // getRecordById fallback so the two can never compute different results
+  // for the same row.
+  //
+  // Finished Goods: Manufacturing_Date gates all three states — a batch
+  // that hasn't started manufacturing yet (or has no Manufacturing_Date)
+  // is left unclassified, never counted Healthy.
+  //   Expired:      Manufacturing_Date <= today AND today >= Expiry_Date
+  //   Expiry Soon:  Manufacturing_Date <= today AND today >= Expiry_Date-2d AND today < Expiry_Date
+  //   Healthy:      Manufacturing_Date <= today AND today < Expiry_Date-5d
+  //
+  // Raw Materials: Manufacturing_Date is never used.
+  //   Expired:      today >= Expiry_Date
+  //   Expiry Soon:  today >= Expiry_Date-2d AND today < Expiry_Date
+  //   Healthy:      today < Expiry_Date-5d
+  function classifyBatch(batch, category) {
+    if (!isValidBatchNumber(batch)) return;
+    if (category !== "Finished Goods" && category !== "Raw Materials") return;
 
     const expiryDate = parseZohoDate(batch[BATCH_FIELDS.expiryDate]);
     if (!expiryDate) return; // Missing expiry dates are intentionally unclassified.
     expiryDate.setHours(0, 0, 0, 0);
 
-    if (category === "Finished Goods" || category === "Raw Materials") {
-      // Both categories: same Expired/Expiry Soon/Healthy formula.
-      // Healthy requires Manufacturing_Date <= zoho.currentdate <= Expiry_Date.
-      if (expiryDate < today) {
-        batchHealth.expired++;
-      } else if (expiryDate > today && expiryDate <= expirySoonCutoff) {
-        batchHealth.expirySoon++;
-      } else {
-        // Must have begun manufacturing before it can be healthy.
-        const manufacturingDate = parseZohoDate(batch[BATCH_FIELDS.manufacturingDate]);
-        if (manufacturingDate) {
-          manufacturingDate.setHours(0, 0, 0, 0);
-          if (manufacturingDate <= today && today <= expiryDate) batchHealth.healthy++;
-        }
+    const soonCutoff = new Date(expiryDate);
+    soonCutoff.setDate(soonCutoff.getDate() - 2); // Expiry_Date - 2 days
+    const healthyCutoff = new Date(expiryDate);
+    healthyCutoff.setDate(healthyCutoff.getDate() - 5); // Expiry_Date - 5 days
+
+    if (category === "Finished Goods") {
+      const manufacturingDate = parseZohoDate(batch[BATCH_FIELDS.manufacturingDate]);
+      if (!manufacturingDate) return; // No Manufacturing_Date — unclassified.
+      manufacturingDate.setHours(0, 0, 0, 0);
+      if (manufacturingDate > today) return; // Not yet in production — unclassified.
+
+      if (today >= expiryDate) {
+        counts.finishedGoodsExpired++;
+      } else if (today >= soonCutoff && today < expiryDate) {
+        counts.finishedGoodsExpirySoon++;
+      } else if (today < healthyCutoff) {
+        counts.finishedGoodsHealthy++;
+      }
+    } else {
+      if (today >= expiryDate) {
+        counts.rawMaterialsExpired++;
+      } else if (today >= soonCutoff && today < expiryDate) {
+        counts.rawMaterialsExpirySoon++;
+      } else if (today < healthyCutoff) {
+        counts.rawMaterialsHealthy++;
       }
     }
   }
@@ -1115,6 +1147,10 @@ function fixedPurchaseOrderSegments(records) {
       fetchReportCached(REPORTS.batches),
       getProductById()
     ]);
+
+    // Total Batches = All_Batch_Details count, independent of category or
+    // whether the Product_Master join below resolves.
+    totalBatches = batches.filter(isValidBatchNumber).length;
 
     // Some Creator report layouts expose the lookup's display value but an ID
     // belonging to the report row rather than Product_Master.ID. Build a
@@ -1141,8 +1177,7 @@ function fixedPurchaseOrderSegments(records) {
     let validBatchCount = 0;
 
     batches.forEach(batch => {
-      const batchNumber = displayValue(batch[BATCH_FIELDS.number]);
-      if (batchNumber === undefined || batchNumber === null || String(batchNumber).trim() === "") return;
+      if (!isValidBatchNumber(batch)) return;
       validBatchCount++;
 
       const product = resolveProduct(batch);
@@ -1161,7 +1196,7 @@ function fixedPurchaseOrderSegments(records) {
       && typeof ZOHO.CREATOR.API.getRecordById === 'function';
 
     if (joinFailed && canFetchById) {
-      batchHealth.total = 0; batchHealth.healthy = 0; batchHealth.expirySoon = 0; batchHealth.expired = 0;
+      Object.keys(counts).forEach(key => { counts[key] = 0; });
       const products = await getProductMaster();
       for (const product of products) {
         const category = String(displayValue(product[PRODUCT_FIELDS.category]) || "").trim();
@@ -1189,22 +1224,28 @@ function fixedPurchaseOrderSegments(records) {
     // needs to be re-checked against Zoho's current widget JS API docs.
     console.info("Batch Health loaded", {
       batchRows: batches.length,
+      totalBatches,
       productRows: productById.size,
       rowsMissingProductLookup,
       joinFailed,
       canFetchById,
       usedGetRecordByIdFallback: joinFailed && canFetchById,
       sampleBatchKeys: batches.length ? Object.keys(batches[0]) : [],
-      batchHealth
+      counts
     });
   } catch (error) {
     console.error("Error fetching All_Batch_Details:", error);
   }
 
-  setText('batchOverall', batchHealth.total);
-  setText('batchHealthy', batchHealth.healthy);
-  setText('batchExpirySoon', batchHealth.expirySoon);
-  setText('batchExpired', batchHealth.expired);
+  // Final combination — each bucket is always Finished Goods + Raw Materials.
+  const healthyBatches = counts.finishedGoodsHealthy + counts.rawMaterialsHealthy;
+  const expirySoon = counts.finishedGoodsExpirySoon + counts.rawMaterialsExpirySoon;
+  const expired = counts.finishedGoodsExpired + counts.rawMaterialsExpired;
+
+  setText('batchOverall', totalBatches);
+  setText('batchHealthy', healthyBatches);
+  setText('batchExpirySoon', expirySoon);
+  setText('batchExpired', expired);
 })();
 
 ////////////////////////// stock distribution (warehouse) — live totals //////////////////////////
